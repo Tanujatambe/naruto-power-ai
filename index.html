@@ -4,426 +4,217 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Naruto Power AI</title>
-
-<!-- MediaPipe Tasks Vision -->
-
-
 <style>
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  font-family: Arial, Helvetica, sans-serif;
-  background:
-    radial-gradient(circle at top, #26365d 0%, #11182c 38%, #070b14 100%);
-  color: white;
-}
-
-header {
-  text-align: center;
-  padding: 28px 20px 18px;
-}
-
-h1 {
-  margin: 0;
-  font-size: clamp(32px, 6vw, 58px);
-  letter-spacing: 3px;
-  text-transform: uppercase;
-}
-
-.subtitle {
-  margin: 8px 0 0;
-  color: #c8d4e8;
-  font-size: 17px;
-}
-
-.container {
-  width: min(1100px, 94%);
-  margin: auto;
-}
-
-.demo {
-  background: rgba(12, 18, 32, 0.88);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 22px;
-  padding: 18px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
-}
-
-.camera {
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  border-radius: 16px;
-  background: #000;
-  aspect-ratio: 16 / 9;
-}
-
-video#webcam {
-  display: none;
-}
-
-canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: contain;
-}
-
-.controls {
-  text-align: center;
-  padding: 18px 8px 4px;
-}
-
-button {
-  border: 0;
-  border-radius: 999px;
-  padding: 13px 28px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  background: #ffffff;
-  color: #111827;
-}
-
-button:hover {
-  transform: translateY(-1px);
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-#status {
-  margin: 12px 0 0;
-  color: #b9c7dc;
-}
-
-.info {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
-  margin-top: 16px;
-}
-
-.card {
-  padding: 18px;
-  border-radius: 16px;
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.08);
-}
-
-.card h2 {
-  margin: 0 0 8px;
-  font-size: 20px;
-}
-
-.card p {
-  margin: 0;
-  color: #c8d4e8;
-  line-height: 1.5;
-}
-
-footer {
-  text-align: center;
-  padding: 25px;
-  color: #91a0b8;
-  font-size: 14px;
-}
-
-@media (max-width: 700px) {
-  .info {
-    grid-template-columns: 1fr;
-  }
-}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#26365d,#070b14 70%);color:#fff}
+header{text-align:center;padding:25px 15px 15px}
+h1{margin:0;font-size:clamp(32px,6vw,56px);letter-spacing:2px}
+.subtitle{color:#c8d4e8;margin:8px 0}
+.container{width:min(1100px,94%);margin:auto}
+.demo{background:#0c1220e8;border:1px solid #ffffff1c;border-radius:20px;padding:16px}
+.camera{position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden}
+#webcam,#overlay{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#webcam{transform:scaleX(-1)}
+#overlay{pointer-events:none}
+.controls{text-align:center;padding:16px 5px}
+button{border:0;border-radius:999px;padding:13px 28px;font-size:16px;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.6}
+#status{color:#c8d4e8;min-height:20px}
+.info{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:15px}
+.card{background:#ffffff0d;border:1px solid #ffffff12;border-radius:14px;padding:16px}
+.card h2{margin:0 0 7px;font-size:19px}.card p{margin:0;color:#c8d4e8}
+footer{text-align:center;color:#91a0b8;padding:22px;font-size:13px}
+@media(max-width:700px){.info{grid-template-columns:1fr}}
 </style>
 </head>
-
 <body>
 <header>
-  <h1>⚡ Naruto Power AI ⚡</h1>
-  <p class="subtitle">
-    AI-powered hand gesture detection with real-time anime effects
-  </p>
+<h1>⚡ Naruto Power AI ⚡</h1>
+<p class="subtitle">AI hand gesture detection with real-time Naruto & Sasuke effects</p>
 </header>
 
 <main class="container">
-  <section class="demo">
-    <div class="camera">
-      <video id="webcam" autoplay playsinline muted></video>
-      <canvas id="canvas"></canvas>
-    </div>
+<section class="demo">
+<div class="camera">
+<video id="webcam" autoplay playsinline muted></video>
+<canvas id="overlay"></canvas>
+</div>
+<div class="controls">
+<button id="startBtn">Start Camera</button>
+<p id="status">Click Start Camera</p>
+</div>
+</section>
 
-    <div class="controls">
-      <button id="startBtn">Start Camera</button>
-      <p id="status">Loading...</p>
-    </div>
-  </section>
-
-  <section class="info">
-    <div class="card">
-      <h2>🔥 Left Hand → Naruto</h2>
-      <p>Open your left hand to activate the Naruto power effect.</p>
-    </div>
-
-    <div class="card">
-      <h2>⚡ Right Hand → Sasuke</h2>
-      <p>Open your right hand to activate the Sasuke power effect.</p>
-    </div>
-  </section>
+<section class="info">
+<div class="card"><h2>🔥 Left Hand → Naruto</h2><p>Open your left hand to activate Naruto.</p></div>
+<div class="card"><h2>⚡ Right Hand → Sasuke</h2><p>Open your right hand to activate Sasuke.</p></div>
+</section>
 </main>
 
-<!-- Hidden effect videos -->
-<video id="narutoVideo" src="./naruto.mp4" muted playsinline loop preload="auto"></video>
-<video id="sasukeVideo" src="./sasuke.mp4" muted playsinline loop preload="auto"></video>
+<video id="narutoVideo" src="./naruto.mp4" muted playsinline loop preload="auto" style="display:none"></video>
+<video id="sasukeVideo" src="./sasuke.mp4" muted playsinline loop preload="auto" style="display:none"></video>
 
-<footer>
-  Naruto Power AI • Computer Vision + MediaPipe + OpenCV-inspired effects
-</footer>
+<footer>Naruto Power AI • Computer Vision + MediaPipe</footer>
 
 <script type="module">
 import { HandLandmarker, FilesetResolver }
-  from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/+esm";
+from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/+esm";
 
-let handLandmarker;
-let running = false;
-let lastVideoTime = -1;
+const video=document.getElementById("webcam");
+const canvas=document.getElementById("overlay");
+const ctx=canvas.getContext("2d");
+const btn=document.getElementById("startBtn");
+const status=document.getElementById("status");
+const naruto=document.getElementById("narutoVideo");
+const sasuke=document.getElementById("sasukeVideo");
 
-const video = document.getElementById("webcam");
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-const statusText = document.getElementById("status");
-const startBtn = document.getElementById("startBtn");
+let detector=null, stream=null, running=false, lastTime=-1;
 
-const narutoVideo = document.getElementById("narutoVideo");
-const sasukeVideo = document.getElementById("sasukeVideo");
-
-async function createLandmarker() {
-  statusText.textContent = "Loading AI hand tracking...";
-
-  const vision = await FilesetResolver.forVisionTasks(
-    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm"
-  );
-
-  handLandmarker = await HandLandmarker.createFromOptions(vision, {
-    baseOptions: {
-      modelAssetPath: "./hand_landmarker.task",
-      delegate: "GPU"
-    },
-    runningMode: "VIDEO",
-    numHands: 2,
-    minHandDetectionConfidence: 0.65,
-    minHandPresenceConfidence: 0.65,
-    minTrackingConfidence: 0.65
-  });
-
-  statusText.textContent = "AI ready — click Start Camera";
-}
-
-function distance(a, b) {
-  return Math.hypot(a.x - b.x, a.y - b.y);
-}
-
-function isOpenHand(points) {
-  const tips = [8, 12, 16, 20];
-  const pips = [6, 10, 14, 18];
-  let count = 0;
-
-  for (let i = 0; i < tips.length; i++) {
-    if (distance(points[tips[i]], points[0]) >
-        distance(points[pips[i]], points[0])) {
-      count++;
-    }
-  }
-  return count >= 3;
-}
-
-const connections = [
-  [0,1],[1,2],[2,3],[3,4],
-  [0,5],[5,6],[6,7],[7,8],
-  [5,9],[9,10],[10,11],[11,12],
-  [9,13],[13,14],[14,15],[15,16],
-  [13,17],[17,18],[18,19],[19,20],
-  [0,17]
+const links=[
+[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],
+[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],
+[13,17],[17,18],[18,19],[19,20],[0,17]
 ];
 
-function drawHand(points, label) {
-  ctx.lineWidth = 3;
-  ctx.strokeStyle = "#00e5ff";
+function d(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
 
-  for (const [a,b] of connections) {
-    ctx.beginPath();
-    ctx.moveTo(points[a].x * canvas.width, points[a].y * canvas.height);
-    ctx.lineTo(points[b].x * canvas.width, points[b].y * canvas.height);
-    ctx.stroke();
-  }
-
-  ctx.fillStyle = "#ffffff";
-  for (const p of points) {
-    ctx.beginPath();
-    ctx.arc(
-      p.x * canvas.width,
-      p.y * canvas.height,
-      4, 0, Math.PI * 2
-    );
-    ctx.fill();
-  }
-
-  const wrist = points[0];
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 18px Arial";
-  ctx.fillText(
-    label,
-    wrist.x * canvas.width + 12,
-    wrist.y * canvas.height - 12
-  );
+function openHand(p){
+let n=0;
+for(const [tip,pip] of [[8,6],[12,10],[16,14],[20,18]])
+ if(d(p[tip],p[0])>d(p[pip],p[0])) n++;
+return n>=3;
 }
 
-function drawEffect(videoElement, x, y, width, height, opacity) {
-  if (videoElement.readyState < 2 || opacity <= 0.01) return;
-
-  ctx.save();
-  ctx.globalAlpha = Math.min(1, opacity);
-
-  const aspect = videoElement.videoWidth / videoElement.videoHeight || 1.4;
-  let w = width;
-  let h = height;
-
-  if (aspect > width / height) {
-    h = width / aspect;
-  } else {
-    w = height * aspect;
-  }
-
-  ctx.globalCompositeOperation = "screen";
-  ctx.drawImage(videoElement, x - w/2, y - h/2, w, h);
-  ctx.globalCompositeOperation = "source-over";
-  ctx.restore();
+function sizeCanvas(){
+if(video.videoWidth && video.videoHeight){
+canvas.width=video.videoWidth;
+canvas.height=video.videoHeight;
+}
 }
 
-async function startCamera() {
-  try {
-    startBtn.disabled = true;
-    statusText.textContent = "Requesting camera permission...";
-
-    await createLandmarker();
-
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
-        facingMode: "user"
-      },
-      audio: false
-    });
-
-    video.srcObject = stream;
-    await video.play();
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    running = true;
-    startBtn.textContent = "Camera Running";
-    statusText.textContent =
-      "Camera active — open your left/right hand to use the powers.";
-
-    requestAnimationFrame(loop);
-  } catch (error) {
-    console.error(error);
-    statusText.textContent =
-      "Could not start camera. Please allow camera access and refresh.";
-    startBtn.disabled = false;
-    startBtn.textContent = "Start Camera";
-  }
+function drawHand(p,label){
+ctx.strokeStyle="#00e5ff";ctx.lineWidth=3;
+for(const [a,b] of links){
+ctx.beginPath();
+ctx.moveTo(p[a].x*canvas.width,p[a].y*canvas.height);
+ctx.lineTo(p[b].x*canvas.width,p[b].y*canvas.height);
+ctx.stroke();
+}
+ctx.fillStyle="#fff";
+for(const q of p){
+ctx.beginPath();ctx.arc(q.x*canvas.width,q.y*canvas.height,4,0,Math.PI*2);ctx.fill();
+}
+const w=p[0];
+ctx.font="bold 18px Arial";
+ctx.fillText(label,w.x*canvas.width+12,w.y*canvas.height-12);
 }
 
-async function loop() {
-  if (!running) return;
-
-  if (video.currentTime !== lastVideoTime) {
-    lastVideoTime = video.currentTime;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.save();
-
-    // Mirror the webcam like a normal selfie camera.
-    ctx.translate(canvas.width, 0);
-    ctx.scale(-1, 1);
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    const result = handLandmarker.detectForVideo(video, performance.now());
-
-    let leftFound = false;
-    let rightFound = false;
-
-    if (result.landmarks) {
-      for (let i = 0; i < result.landmarks.length; i++) {
-        const points = result.landmarks[i];
-        const rawLabel = result.handednesses[i][0].categoryName;
-
-        // Because the displayed webcam is mirrored, the visual
-        // left/right is reversed compared with the raw camera label.
-        const visualRight = rawLabel === "Left";
-        const label = visualRight ? "RIGHT → SASUKE" : "LEFT → NARUTO";
-
-        drawHand(points, label);
-
-        const open = isOpenHand(points);
-        const wrist = points[0];
-        const palm = points[9];
-
-        const x = wrist.x * canvas.width;
-        const y = wrist.y * canvas.height;
-
-        // Effects are also mirrored by the canvas transform.
-        if (visualRight && open) {
-          rightFound = true;
-          sasukeVideo.play().catch(() => {});
-          drawEffect(sasukeVideo, x, y, 600, 450, 0.85);
-        }
-
-        if (!visualRight && open) {
-          leftFound = true;
-          narutoVideo.play().catch(() => {});
-
-          const dx = (palm.x - wrist.x) * canvas.width;
-          const dy = (palm.y - wrist.y) * canvas.height;
-
-          drawEffect(
-            narutoVideo,
-            palm.x * canvas.width + dx * 0.8,
-            palm.y * canvas.height + dy * 0.8 - 100,
-            500,
-            350,
-            0.85
-          );
-        }
-      }
-    }
-
-    ctx.restore();
-
-    if (leftFound || rightFound) {
-      statusText.textContent =
-        `${leftFound ? "🔥 Naruto active" : ""} ${rightFound ? "⚡ Sasuke active" : ""}`;
-    } else {
-      statusText.textContent =
-        "Camera active — open your left or right hand.";
-    }
-  }
-
-  requestAnimationFrame(loop);
+function effect(v,x,y,w,h,opacity){
+if(v.readyState<2)return;
+const aspect=(v.videoWidth/v.videoHeight)||1.4;
+if(aspect>w/h)h=w/aspect;else w=h*aspect;
+ctx.save();
+ctx.globalAlpha=opacity;
+ctx.globalCompositeOperation="screen";
+ctx.drawImage(v,x-w/2,y-h/2,w,h);
+ctx.restore();
 }
 
-startBtn.addEventListener("click", startCamera);
-window.addEventListener("load", () => {
-  statusText.textContent = "Ready — click Start Camera";
+async function loadAI(){
+status.textContent="Camera is on. Loading AI hand tracking...";
+try{
+const vision=await FilesetResolver.forVisionTasks(
+"https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm"
+);
+detector=await HandLandmarker.createFromOptions(vision,{
+baseOptions:{modelAssetPath:"./hand_landmarker.task",delegate:"GPU"},
+runningMode:"VIDEO",numHands:2,
+minHandDetectionConfidence:.65,
+minHandPresenceConfidence:.65,
+minTrackingConfidence:.65
 });
+status.textContent="AI ready — show an open hand!";
+requestAnimationFrame(loop);
+}catch(e){
+console.error(e);
+status.textContent="Camera works, but AI failed to load. Check the browser console.";
+}
+}
+
+async function start(){
+try{
+btn.disabled=true;
+status.textContent="Requesting camera permission...";
+
+stream=await navigator.mediaDevices.getUserMedia({
+video:{width:{ideal:1280},height:{ideal:720},facingMode:"user"},
+audio:false
+});
+video.srcObject=stream;
+
+await new Promise(resolve=>{
+if(video.readyState>=1) resolve();
+else video.onloadedmetadata=resolve;
+});
+await video.play();
+sizeCanvas();
+
+btn.textContent="Camera Running";
+status.textContent="Camera is on — loading AI...";
+running=true;
+loadAI();
+}catch(e){
+console.error(e);
+status.textContent="Camera error: "+(e.message||e.name);
+btn.disabled=false;
+btn.textContent="Start Camera";
+}
+}
+
+async function loop(){
+if(!running)return;
+if(video.readyState>=2){
+sizeCanvas();
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+if(detector && video.currentTime!==lastTime){
+lastTime=video.currentTime;
+try{
+const result=detector.detectForVideo(video,performance.now());
+let left=false,right=false;
+
+for(let i=0;i<result.landmarks.length;i++){
+const p=result.landmarks[i];
+const raw=result.handednesses[i][0].categoryName;
+const visualRight=raw==="Left";
+const opened=openHand(p);
+drawHand(p,visualRight?"RIGHT → SASUKE":"LEFT → NARUTO");
+
+const wrist=p[0], palm=p[9];
+const x=wrist.x*canvas.width, y=wrist.y*canvas.height;
+
+if(opened && visualRight){
+right=true;sasuke.play().catch(()=>{});
+effect(sasuke,x,y,600,450,.85);
+}
+if(opened && !visualRight){
+left=true;
+naruto.play().catch(()=>{});
+const dx=(palm.x-wrist.x)*canvas.width;
+const dy=(palm.y-wrist.y)*canvas.height;
+effect(naruto,palm.x*canvas.width+dx*.8,palm.y*canvas.height+dy*.8-100,500,350,.85);
+}
+}
+status.textContent=left||right
+?(left?"🔥 Naruto active ":"")+(right?"⚡ Sasuke active":"")
+:"Camera active — show an open hand";
+}catch(e){console.error(e)}
+}
+}
+requestAnimationFrame(loop);
+}
+
+btn.addEventListener("click",start);
 </script>
 </body>
 </html>
